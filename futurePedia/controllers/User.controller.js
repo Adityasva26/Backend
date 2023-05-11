@@ -29,7 +29,9 @@ module.exports = {
     discover,
     todayTools,
     todaynews,
-    test
+    test,
+    productByCategory,
+    sorting
 }
 
 
@@ -523,9 +525,9 @@ async function favouritesList(req, res) {
     }
     var productdata = []
     const Favourites_list = await favourites.find({ user_id: req.body.id, status: "Active" })
-    console.log("ProduewwwwwwwwwwwwwwwwwwwwwctList", Favourites_list)
+   
     for (let j = 0; Favourites_list.length > j; ++j) {
-        console.log("ProduewwwwwwwwwwwwwwwwwwwwwctList")
+     
         if (Favourites_list[j]?.type == "product") {
             var ProductList = await product.findOne({ _id: Favourites_list[j]?.product_id, status: "Active" }).sort({ _id: -1 })
         }
@@ -648,23 +650,23 @@ async function filter(req, res) {
     }
 
     if (param1 && param2 && param3) {
-        query = { category: param1, pricing: { $in: param2 }, pricing: { $in: param2 } };
+        query = { category: param1, pricing_category: { $in: param2 }, feature: { $in: param2 } };
     } else if (param1 && param2) {
-        query = { category: param1, pricing: { $in: param2 } };
+        query = { category: param1, pricing_category: { $in: param2 } };
     } else if (param2 && param3) {
-        query = { pricing: { $in: param2 }, feature: { $in: param3 } };
+        query = { pricing_category: { $in: param2 }, feature: { $in: param3 } };
     } else if (param1 && param3) {
         query = { category: param1, feature: { $in: param3 } };
     } else if (param1) {
         query = { category: param1 };
     } else if (param2) {
-        query = { pricing: { $in: param2 } };
+        query = { pricing_category: { $in: param2 } };
     } else if (param3) {
         query = { pricing: { $in: param3 } };
     }
     console.log("query", query)
     const data = await product.find(query)
-
+    console.log("data", data)
     const products = []
     for (let i = 0; data.length > i; ++i) {
         const pricing = await db.Pricing.findOne({ _id: data[i].pricing_category })
@@ -709,10 +711,19 @@ async function filter(req, res) {
             data: FeatureList
         }
     ]
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+    const todatproductcount = await product.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
+
+    const todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
     return res.status(200).json({
         data: products,
         category: CategoryList,
         Filter: filter,
+        todatproductcount: todatproductcount,
+        todaynewscount: todaynewscount,
         messgae: "success",
         status: "1"
     })
@@ -847,30 +858,177 @@ async function todaynews(req, res) {
     })
 }
 
-async function test (req,res){
+async function test(req, res) {
     try {
         const startOfWeek = new Date();
         startOfWeek.setHours(0, 0, 0, 0);
         startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    
+
         const endOfWeek = new Date();
         endOfWeek.setHours(23, 59, 59, 999);
         endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
-    
+
         const Products = await product.aggregate([
-          {
-            $match: {
-                created_at: {
-                $gte: startOfWeek,
-                $lte: endOfWeek,
-              },
+            {
+                $match: {
+                    created_at: {
+                        $gte: startOfWeek,
+                        $lte: endOfWeek,
+                    },
+                },
             },
-          },
         ]);
-    
+
         res.json(Products);
-      } catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
-      }
+    }
+}
+
+async function productByCategory (req,res){
+    console.log(req.body)
+
+    if (__dirname == "/jinni/backend/jinni/controllers") {
+        var PicUrl = `${process.env.URL}/uploads/product/`;
+    } else {
+        var PicUrl =
+            "http://" + req.get("host") + "/uploads/product/";
+    }
+    const FeatureList = await feature.find({ status: "Active" })
+    const PricingList = await pricing.find({ status: "Active" })
+    const CategoryList = await category.find({ status: "Active", type: "product" })
+    const ProductList = await product.find({ status: "Active" ,category:req.body.id }).sort({ _id: -1 })
+    // const todayProductCount = await product.find({ status: "Active", created_at: }).sort({_id:-1})
+
+    const filter = [
+        {
+            Header: "Pricing",
+            data: PricingList
+        },
+        {
+            Header: "Features",
+            data: FeatureList
+        }
+    ]
+    const products = []
+    for (let i = 0; ProductList.length > i; ++i) {
+        const pricing = await db.Pricing.findOne({ _id: ProductList[i].pricing_category })
+        var heartStatus = ""
+        console.log("user_id", req.body.user_id)
+        if (req.body.user_id != undefined) {
+            console.log()
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: ProductList[i].id })
+            if (favourites == null) {
+                heartStatus = "0"
+            } else {
+                heartStatus = favourites.heart_status
+            }
+        }
+        products.push({
+            title: ProductList[i].title,
+            id: ProductList[i].id,
+            url: ProductList[i].url,
+            heartStatus: heartStatus,
+            category: ProductList[i].category,
+            short_discription: ProductList[i].short_discription,
+            discription: ProductList[i].discription,
+            features: ProductList[i].features,
+            pricing_category: pricing?.title,
+            Favourites_count: ProductList[i]?.Favourites_count,
+            price: ProductList[i].price,
+            association: ProductList[i].association,
+            image: PicUrl + ProductList[i].image,
+        })
+    }
+
+    return res.status(200).json({
+        data: products,
+        category: CategoryList,
+        Filter: filter,
+        message: "success",
+        status: "1"
+    })
+}
+
+async function sorting (req,res){
+    if (__dirname == "/jinni/backend/jinni/controllers") {
+        var PicUrl = `${process.env.URL}/uploads/product/`;
+    } else {
+        var PicUrl =
+            "http://" + req.get("host") + "/uploads/product/";
+    }
+    console.log("sosorting",req.body)
+    var ProductList=[]
+    if(req.body.sort=="Verified"){
+     ProductList = await product.find({ status: "Active" ,verified:"verified" }).sort({ _id: -1 })
+    }
+    else if(req.body.sort=="New"){
+     ProductList = await product.find({ status: "Active"}).sort({ _id: -1 })
+    }
+    else if(req.body.sort=="Popular"){
+     ProductList = await product.find({ status: "Active" }).sort({ Favourites_count: -1 })
+    }
+    const FeatureList = await feature.find({ status: "Active" })
+    const PricingList = await pricing.find({ status: "Active" })
+    const CategoryList = await category.find({ status: "Active", type: "product" })
+
+    const filter = [
+        {
+            Header: "Pricing",
+            data: PricingList
+        },
+        {
+            Header: "Features",
+            data: FeatureList
+        }
+    ]
+    const products = []
+    for (let i = 0; ProductList.length > i; ++i) {
+        const pricing = await db.Pricing.findOne({ _id: ProductList[i].pricing_category })
+        var heartStatus = ""
+        console.log("user_id", req.body.user_id)
+        if (req.body.user_id != undefined) {
+            console.log()
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: ProductList[i].id })
+            if (favourites == null) {
+                heartStatus = "0"
+            } else {
+                heartStatus = favourites.heart_status
+            }
+        }
+        products.push({
+            title: ProductList[i].title,
+            id: ProductList[i].id,
+            url: ProductList[i].url,
+            heartStatus: heartStatus,
+            category: ProductList[i].category,
+            short_discription: ProductList[i].short_discription,
+            discription: ProductList[i].discription,
+            features: ProductList[i].features,
+            pricing_category: pricing?.title,
+            Favourites_count: ProductList[i]?.Favourites_count,
+            price: ProductList[i].price,
+            association: ProductList[i].association,
+            image: PicUrl + ProductList[i].image,
+        })
+    }
+    const today = new Date();
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+    const todatproductcount = await product.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
+
+    const todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
+
+    return res.status(200).json({
+        data: products,
+        todatproductcount: todatproductcount,
+        todaynewscount: todaynewscount,
+        category: CategoryList,
+        Filter: filter,
+        message: "success",
+        status: "1"
+    })
+
 }

@@ -1,4 +1,4 @@
 ﻿{
-    "connectionString": "mongodb://127.0.0.1:27017/futurePedia",
+    "connectionString": "mongodb+srv://adityasharma:Cmw@1234@cluster0.ovcluhd.mongodb.net/futurePedia",
     "secret": "8Zz5tw0Ionm3XPZZfN0NOml3z9FMfmpgXwovR9fp6ryDIoGRM8EPHAB6iHsc02o"
 }

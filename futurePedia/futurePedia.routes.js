@@ -67,6 +67,8 @@ router.post("/filter",filter)
 router.post("/discover",discover)
 router.post("/todayTools",todayTools)
 router.post("/todaynews",todaynews)
+router.post("/productByCategory",productByCategory)
+router.post("/sorting",sorting)
 router.get("/test",test)
 module.exports = router;
 
@@ -400,5 +402,19 @@ function test(req, res,next){
   userController
     .test(req, res)
     .then((data) => console.log("test"))
+    .catch((err) => next(err));
+}
+function productByCategory(req, res,next){
+  console.log("productByCategory")
+  userController
+    .productByCategory(req, res)
+    .then((data) => console.log("productByCategory"))
+    .catch((err) => next(err));
+}
+function sorting(req, res,next){
+  console.log("sorting")
+  userController
+    .sorting(req, res)
+    .then((data) => console.log("sorting"))
     .catch((err) => next(err));
 }

@@ -13,7 +13,8 @@ const schema = new Schema({
     Favourites_count: {type: Number , default:0 },
     association: {type: Boolean ,enum: [true, false]},
     image: {type: String },
-    status: { type: String, enum: ["Validate",'Active', 'Inactive'], default: 'Active' },
+    verified: { type: String, enum: ['unverified', 'verified'], default: 'unverified' },
+    status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
     created_at: { type: Date, default: Date.now },
 });
 
