@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const path = require("path");
 const {uploadPhoto} = require('../futurePedia/middleware/uploadPhoto');
 const adminController = require("../futurePedia/controllers/Admin.controller");
 const userController = require("../futurePedia/controllers/User.controller")
@@ -66,6 +66,9 @@ router.post("/todayTools",todayTools)
 router.post("/todaynews",todaynews)
 router.post("/productByCategory",productByCategory)
 router.post("/sorting",sorting)
+router.post("/byTime",byTime)
+router.post("/byCategory",byCategory)
+router.post("/newsSorting",newsSorting)
 router.get("/test",test)
 module.exports = router;
 
@@ -413,5 +416,26 @@ function sorting(req, res,next){
   userController
     .sorting(req, res)
     .then((data) => console.log("sorting"))
+    .catch((err) => next(err));
+}
+function byTime(req, res,next){
+  console.log("byTime")
+  userController
+    .byTime(req, res)
+    .then((data) => console.log("byTime"))
+    .catch((err) => next(err));
+}
+function byCategory(req, res,next){
+  console.log("byCategory")
+  userController
+    .byCategory(req, res)
+    .then((data) => console.log("byCategory"))
+    .catch((err) => next(err));
+}
+function newsSorting(req, res,next){
+  console.log("newsSorting")
+  userController
+    .newsSorting(req, res)
+    .then((data) => console.log("newsSorting"))
     .catch((err) => next(err));
 }

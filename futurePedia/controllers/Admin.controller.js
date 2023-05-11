@@ -512,9 +512,19 @@ async function categoryList(req, res) {
   console.log("categoryList", req.body)
 
   const data = await category.find({}).sort({ _id: -1 });
+  var list = []
+  for(let i=0;data.length>i;++i){
+    var productlength = await product.find({category:data[i].id})
+    list.push({
+      title:data[i].title,
+      id:data[i].id,
+      productCount:productlength.length
+    })
+  }
 
   return res.status(200).json({
-    data: data,
+    data: list,
+   
     messgae: "success",
     status: "1"
   })

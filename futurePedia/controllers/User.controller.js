@@ -1,5 +1,5 @@
-const db = require("../../_helpers/db");
-const config = require("../../config.json");
+const db = require("_helpers/db");
+const config = require("config.json");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { productList } = require("./Admin.controller");
@@ -31,7 +31,10 @@ module.exports = {
     todaynews,
     test,
     productByCategory,
-    sorting
+    sorting,
+    byTime,
+    byCategory,
+    newsSorting
 }
 
 
@@ -525,9 +528,9 @@ async function favouritesList(req, res) {
     }
     var productdata = []
     const Favourites_list = await favourites.find({ user_id: req.body.id, status: "Active" })
-   
+
     for (let j = 0; Favourites_list.length > j; ++j) {
-     
+
         if (Favourites_list[j]?.type == "product") {
             var ProductList = await product.findOne({ _id: Favourites_list[j]?.product_id, status: "Active" }).sort({ _id: -1 })
         }
@@ -627,10 +630,11 @@ async function newssdata(req, res) {
             created_at: newsdata[i]?.created_at
         })
     }
-
+    const CategoryList = await category.find({ status: "Active", type: "news" })
     console.log("data", data)
     return res.status(200).json({
         data: data,
+        CategoryList:CategoryList,
         messgae: "success",
         status: "1"
     })
@@ -886,7 +890,7 @@ async function test(req, res) {
     }
 }
 
-async function productByCategory (req,res){
+async function productByCategory(req, res) {
     console.log(req.body)
 
     if (__dirname == "/jinni/backend/jinni/controllers") {
@@ -898,7 +902,7 @@ async function productByCategory (req,res){
     const FeatureList = await feature.find({ status: "Active" })
     const PricingList = await pricing.find({ status: "Active" })
     const CategoryList = await category.find({ status: "Active", type: "product" })
-    const ProductList = await product.find({ status: "Active" ,category:req.body.id }).sort({ _id: -1 })
+    const ProductList = await product.find({ status: "Active", category: req.body.id }).sort({ _id: -1 })
     // const todayProductCount = await product.find({ status: "Active", created_at: }).sort({_id:-1})
 
     const filter = [
@@ -951,23 +955,23 @@ async function productByCategory (req,res){
     })
 }
 
-async function sorting (req,res){
+async function sorting(req, res) {
     if (__dirname == "/jinni/backend/jinni/controllers") {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
             "http://" + req.get("host") + "/uploads/product/";
     }
-    console.log("sosorting",req.body)
-    var ProductList=[]
-    if(req.body.sort=="Verified"){
-     ProductList = await product.find({ status: "Active" ,verified:"verified" }).sort({ _id: -1 })
+    console.log("sosorting", req.body)
+    var ProductList = []
+    if (req.body.sort == "Verified") {
+        ProductList = await product.find({ status: "Active", verified: "verified" }).sort({ _id: -1 })
     }
-    else if(req.body.sort=="New"){
-     ProductList = await product.find({ status: "Active"}).sort({ _id: -1 })
+    else if (req.body.sort == "New") {
+        ProductList = await product.find({ status: "Active" }).sort({ _id: -1 })
     }
-    else if(req.body.sort=="Popular"){
-     ProductList = await product.find({ status: "Active" }).sort({ Favourites_count: -1 })
+    else if (req.body.sort == "Popular") {
+        ProductList = await product.find({ status: "Active" }).sort({ Favourites_count: -1 })
     }
     const FeatureList = await feature.find({ status: "Active" })
     const PricingList = await pricing.find({ status: "Active" })
@@ -1031,4 +1035,156 @@ async function sorting (req,res){
         status: "1"
     })
 
+}
+
+async function byTime(req, res) {
+    console.log("byTime",req.body)
+    var todaynewscount = []
+    if (req.body.sort == "Week") {
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+        const startOfWeek = new Date(today); // Make a copy of today's date
+        startOfWeek.setDate(today.getDate() - dayOfWeek); // Set the start date to Sunday
+
+        const endOfWeek = new Date(today); // Make another copy of today's date
+        endOfWeek.setDate(today.getDate() + (6 - dayOfWeek));
+        todaynewscount = await news.find({ created_at: { $gte: startOfWeek, $lt: endOfWeek } })
+    }
+    else if (req.body.sort == "Month") {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const startOfMonth = new Date(year, month, 1); // Set the start date to the first day of the month
+        const endOfMonth = new Date(year, month + 1, 0);
+        todaynewscount = await news.find({ created_at: { $gte: startOfMonth, $lt: endOfMonth } })
+    }
+    else if (req.body.sort == "Today") {
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+        todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } })
+    }
+    else if(req.body.sort == "All"){
+        todaynewscount = await news.find({ status:"Active" })
+    }
+    var data = []
+    var count = []
+    for (let i = 0; todaynewscount.length > i; ++i) {
+
+        var HeartStatus = ""
+        if (req.body.user_id != undefined) {
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: todaynewscount[i].id })
+            if (favourites == null) {
+                HeartStatus = "0"
+            } else {
+                HeartStatus = favourites.heart_status
+            }
+        }
+        console.log(moment(todaynewscount[i]?.created_at).calendar())
+        console.log(todaynewscount[i]?.created_at)
+
+        data.push({
+            title: todaynewscount[i]?.title,
+            url: todaynewscount[i]?.url,
+            id: todaynewscount[i]?.id,
+            Favourites_count: todaynewscount[i]?.Favourites_count,
+            HeartStatus: HeartStatus,
+            category: todaynewscount[i]?.category,
+            created_at: todaynewscount[i]?.created_at
+        })
+    }
+    const CategoryList = await category.find({ status: "Active", type: "news" })
+    return res.status(200).json({
+        data: data,
+        CategoryList:CategoryList,
+        message: "success",
+        status: "1"
+    })
+}
+async function byCategory(req, res) {
+    console.log("byCategory",req.body)
+  
+     const   todaynewscount = await news.find({ category: req.body.category })
+ 
+    var data = []
+    var count = []
+    for (let i = 0; todaynewscount.length > i; ++i) {
+
+        var HeartStatus = ""
+        if (req.body.user_id != undefined) {
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: todaynewscount[i].id })
+            if (favourites == null) {
+                HeartStatus = "0"
+            } else {
+                HeartStatus = favourites.heart_status
+            }
+        }
+        console.log(moment(todaynewscount[i]?.created_at).calendar())
+        console.log(todaynewscount[i]?.created_at)
+
+        data.push({
+            title: todaynewscount[i]?.title,
+            url: todaynewscount[i]?.url,
+            id: todaynewscount[i]?.id,
+            Favourites_count: todaynewscount[i]?.Favourites_count,
+            HeartStatus: HeartStatus,
+            category: todaynewscount[i]?.category,
+            created_at: todaynewscount[i]?.created_at
+        })
+    }
+    const CategoryList = await category.find({ status: "Active", type: "news" })
+    return res.status(200).json({
+        data: data,
+        CategoryList:CategoryList,
+        message: "success",
+        status: "1"
+    })
+}
+async function newsSorting(req,res){
+    var newslist = []
+    if (req.body.sort == "Verified") {
+        todaynewscount = await product.find({ status: "Active", verified: "verified" }).sort({ _id: -1 })
+    }
+    else if (req.body.sort == "New") {
+        todaynewscount = await product.find({ status: "Active" }).sort({ _id: -1 })
+    }
+    else if (req.body.sort == "Popular") {
+        todaynewscount = await product.find({ status: "Active" }).sort({ Favourites_count: -1 })
+    }
+    const CategoryList = await category.find({ status: "Active", type: "news" })
+
+    var data = []
+    var count = []
+    for (let i = 0; todaynewscount.length > i; ++i) {
+
+        var HeartStatus = ""
+        if (req.body.user_id != undefined) {
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: todaynewscount[i].id })
+            if (favourites == null) {
+                HeartStatus = "0"
+            } else {
+                HeartStatus = favourites.heart_status
+            }
+        }
+        console.log(moment(todaynewscount[i]?.created_at).calendar())
+        console.log(todaynewscount[i]?.created_at)
+
+        data.push({
+            title: todaynewscount[i]?.title,
+            url: todaynewscount[i]?.url,
+            id: todaynewscount[i]?.id,
+            Favourites_count: todaynewscount[i]?.Favourites_count,
+            HeartStatus: HeartStatus,
+            category: todaynewscount[i]?.category,
+            created_at: todaynewscount[i]?.created_at
+        })
+    }
+   
+
+    return res.status(200).json({
+        data: todaynewscount,
+        CategoryList: CategoryList,
+        message: "success",
+        status: "1"
+    })
 }
