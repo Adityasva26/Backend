@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
+
 const {uploadPhoto} = require('../futurePedia/middleware/uploadPhoto');
 const adminController = require("../futurePedia/controllers/Admin.controller");
 const userController = require("../futurePedia/controllers/User.controller")

@@ -1,5 +1,5 @@
 const expressJwt = require('express-jwt');
-const config = require('config.json');
+const config = require('../config.json');
 const userService = require('../futurePedia/controllers/Admin.controller');
 module.exports = jwt;
 
