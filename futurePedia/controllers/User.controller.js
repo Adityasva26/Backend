@@ -1,5 +1,5 @@
-const db = require("../../_helpers/db");
-const config = require("../../config.json");
+const db = require("_helpers/db");
+const config = require("config.json");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { productList } = require("./Admin.controller");
@@ -16,6 +16,7 @@ const favourites = db.Favourites
 
 module.exports = {
     login,
+    register,
     socialregister,
     HomePage,
     detailPage,
@@ -56,7 +57,7 @@ async function login(req, res) {
         });
     }
 
-    const user = await User.findOne({ email: req.body.email, status: "Active" });
+    const user = await User.findOne({ email: req.body.email.toLowerCase(), status: "Active" });
     if (!user) {
         return res.status(200).json({ message: "User Not found", status: "0" });
     }
@@ -79,10 +80,10 @@ async function login(req, res) {
                     if (result) {
                         const Users = await User.findOne({ email: req.body.email });
                         Userdata = {
-                            full_name: Users.full_name,
-                            email: Users.email,
-                            created_at: Users.created_at,
-                            id: Users._id,
+                            full_name: Users?.full_name,
+                            email: Users?.email,
+                            created_at: Users?.created_at,
+                            id: Users?._id,
                         };
 
                         console.log("Userdata", Userdata);
@@ -107,8 +108,10 @@ async function login(req, res) {
 
 //  social Login Api
 async function socialregister(req, res) {
-    // try {
-    console.log("socialregister", req.body);
+    try {
+     const   social_id = req.body.social_id==undefined?"":req.body.social_id
+    console.log("socialregisterewewewewe", social_id);
+    console.log("socialregisteuserexist", await User.findOne({ social_id: social_id }));
 
     if (req.body.email == "") {
         return res.status(200).json({
@@ -129,10 +132,10 @@ async function socialregister(req, res) {
             status: "0",
         });
     }
-    if (await User.findOne({ social_id: req.body.social_id })) {
+    if (await User.findOne({ social_id: social_id })) {
         console.log("Account Allready here", req.body);
         var Socialdataresult = await User.findOne({
-            social_id: req.body.social_id,
+            social_id: social_id,
         });
 
         const token = jwt.sign({ sub: Socialdataresult.id }, config.secret, {
@@ -148,7 +151,7 @@ async function socialregister(req, res) {
             },
             async function (err, result) {
                 if (result) {
-                    var user = await User.findOne({ social_id: req.body.social_id });
+                    var user = await User.findOne({ social_id: social_id });
                     res.status(200).json({
                         data: user,
                         message: "Success",
@@ -164,7 +167,7 @@ async function socialregister(req, res) {
         const payload = {
             email: req.body.email,
             full_name: req.body.full_name,
-            social_id: req.body.social_id,
+            social_id: social_id,
             social_name: req.body.social_name,
         };
         const token = jwt.sign(payload, config.secret, {
@@ -173,13 +176,13 @@ async function socialregister(req, res) {
         const Userdatavalue = new User({
             email: req.body.email,
             full_name: req.body.full_name,
-            social_id: req.body.social_id,
+            social_id: social_id,
             social_name: req.body.social_name,
             token: token,
         });
         await User.create(Userdatavalue, async function (err, result) {
             if (result) {
-                const user = await User.findOne({ social_id: req.body.social_id });
+                const user = await User.findOne({ social_id: social_id });
                 console.log("Add User Done");
                 const token = jwt.sign({ sub: user.id }, config.secret, {
                     expiresIn: "365d",
@@ -194,7 +197,7 @@ async function socialregister(req, res) {
                     async function (err, result) {
                         if (result) {
                             var user = await User.findOne({
-                                social_id: req.body.social_id,
+                                social_id: social_id,
                             });
                             return res.status(200).json({
                                 message: "Success",
@@ -217,13 +220,71 @@ async function socialregister(req, res) {
             }
         });
     }
-    // } catch (err) {
-    //     console.log("social login failed", err);
-    //     res.status(200).json({
-    //         message: "social login failed",
-    //         status: "0",
-    //     });
-    // }
+    } catch (err) {
+        console.log("social login failed", err);
+        res.status(200).json({
+            message: "social login failed",
+            status: "0",
+        });
+    }
+}
+// Register
+async function register(req, res) {
+
+    if (req.body.email == "") {
+        return res.status(200).json({
+            message: "Email is Required",
+            status: "0",
+        });
+    }
+    if (req.body.name == "") {
+        return res.status(200).json({
+            message: "Name is Required",
+            status: "0",
+        });
+    }
+
+    if (req.body.password == "") {
+        return res.status(200).json({
+            message: "password is Required",
+            status: "0",
+        });
+    }
+
+
+
+
+    const payload = {
+        email: req.body.email,
+        full_name: req.body.name,
+        password: bcrypt.hashSync(req.body.password, 10),
+    };
+    const token = jwt.sign(payload, config.secret, {
+        expiresIn: "365d",
+    });
+    const Userdatavalue = new User({
+        email: req.body.email,
+        full_name: req.body.name,
+        password: bcrypt.hashSync(req.body.password, 10),
+        token: token,
+    });
+
+
+    
+    await User.create(Userdatavalue, async function (err, result) {
+        const user = await User.findOne({ email: req.body.email });
+        if (result) {
+            return res.status(200).json({
+                message: "Success", 
+                data : user,
+                status: "1",
+            });
+        } else {
+            return res
+                .status(200)
+                .json({ message: "User Not regester", status: "0" });
+        }
+    });
 }
 
 //  HomePage Api
@@ -265,6 +326,12 @@ async function HomePage(req, res) {
                 heartStatus = favourites.heart_status
             }
         }
+
+
+
+
+
+        
         products.push({
             title: ProductList[i].title,
             id: ProductList[i].id,
@@ -634,7 +701,7 @@ async function newssdata(req, res) {
     console.log("data", data)
     return res.status(200).json({
         data: data,
-        CategoryList:CategoryList,
+        CategoryList: CategoryList,
         messgae: "success",
         status: "1"
     })
@@ -1038,7 +1105,7 @@ async function sorting(req, res) {
 }
 
 async function byTime(req, res) {
-    console.log("byTime",req.body)
+    console.log("byTime", req.body)
     var todaynewscount = []
     if (req.body.sort == "Week") {
         const today = new Date();
@@ -1064,8 +1131,8 @@ async function byTime(req, res) {
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
         todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } })
     }
-    else if(req.body.sort == "All"){
-        todaynewscount = await news.find({ status:"Active" })
+    else if (req.body.sort == "All") {
+        todaynewscount = await news.find({ status: "Active" })
     }
     var data = []
     var count = []
@@ -1096,16 +1163,16 @@ async function byTime(req, res) {
     const CategoryList = await category.find({ status: "Active", type: "news" })
     return res.status(200).json({
         data: data,
-        CategoryList:CategoryList,
+        CategoryList: CategoryList,
         message: "success",
         status: "1"
     })
 }
 async function byCategory(req, res) {
-    console.log("byCategory",req.body)
-  
-     const   todaynewscount = await news.find({ category: req.body.category })
- 
+    console.log("byCategory", req.body)
+
+    const todaynewscount = await news.find({ category: req.body.category })
+
     var data = []
     var count = []
     for (let i = 0; todaynewscount.length > i; ++i) {
@@ -1135,12 +1202,12 @@ async function byCategory(req, res) {
     const CategoryList = await category.find({ status: "Active", type: "news" })
     return res.status(200).json({
         data: data,
-        CategoryList:CategoryList,
+        CategoryList: CategoryList,
         message: "success",
         status: "1"
     })
 }
-async function newsSorting(req,res){
+async function newsSorting(req, res) {
     var newslist = []
     if (req.body.sort == "Verified") {
         todaynewscount = await product.find({ status: "Active", verified: "verified" }).sort({ _id: -1 })
@@ -1179,7 +1246,7 @@ async function newsSorting(req,res){
             created_at: todaynewscount[i]?.created_at
         })
     }
-   
+
 
     return res.status(200).json({
         data: todaynewscount,

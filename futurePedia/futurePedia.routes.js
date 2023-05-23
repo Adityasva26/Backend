@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const path = require("path");
 const {uploadPhoto} = require('../futurePedia/middleware/uploadPhoto');
 const adminController = require("../futurePedia/controllers/Admin.controller");
 const userController = require("../futurePedia/controllers/User.controller")
@@ -56,6 +56,7 @@ router.post("/RegexApi",RegexApi)
 router.post("/socialregister",socialregister)
 router.post("/Favourites",Favourites)
 router.post("/login",login)
+router.post("/register",register)
 router.post("/categoryListbtType",categoryListbtType)
 router.post("/dropdown",dropdown)
 router.post("/newssdata",newssdata)
@@ -339,6 +340,12 @@ function login(req, res,next){
   userController
     .login(req, res)
     .then((data) => console.log("login"))
+    .catch((err) => next(err));
+}
+function register(req, res,next){
+  userController
+    .register(req, res)
+    .then((data) => console.log("register"))
     .catch((err) => next(err));
 }
 function dropdown(req, res,next){
