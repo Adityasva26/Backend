@@ -9,6 +9,7 @@ const category = db.Category
 const feature = db.Feature
 const pricing = db.Pricing
 const blog = db.Blog
+const comment = db.Comment
 
 module.exports = {
   userList,
@@ -28,6 +29,7 @@ module.exports = {
   newsById,
   newsUpdate,
   newsStatusUpdate,
+  newsdelete,
 
   categoryList,
   addcategory,
@@ -55,6 +57,12 @@ module.exports = {
   BlogById,
   BlogUpdate,
   BlogDelete,
+  
+  CommentList,
+  addComment,
+  CommentById,
+ CommentUpdate,
+  CommentDelete,
 
 }
 
@@ -285,7 +293,29 @@ async function newsStatusUpdate(req, res) {
 
   await db.News.updateOne({ _id: req.body.id },
     {
-      status: req.body.status,
+      verified: "verified",
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
+// news status Update
+async function newsdelete(req, res) {
+  console.log("newsdelete", req.body)
+
+  await db.News.updateOne({ _id: req.body.id },
+    {
+      status: "Inactive",
     }, function (err, result) {
       if (result) {
         return res.status(200).json({
@@ -427,11 +457,25 @@ async function productById(req, res) {
     association: categorybyproduct[i].association,
     id: categorybyproduct[i]._id,
     image: PicUrl + categorybyproduct[i].image,
+    image: categorybyproduct[i].image,
    })
+  }
+  const CommentList = []
+  const comment = await db.Comment.find({_id:req.body.id})
+  for(let i=0;comment.length>i;++i){
+    const userTitle = await user.find({_id:comment[i].userId})
+
+    CommentList.push({
+  ratting:comment[i].ratting,
+  comment:comment[i].comment,
+  productId:comment[i].productId,
+  userName:userTitle.fulll_name,
+ })
   }
   return res.status(200).json({
     data: productData,
     simmilarproduct:simmilarproduct,
+    commentList:CommentList,
     messgae: "success",
     status: "1"
   })
@@ -483,11 +527,11 @@ async function productUpdate(req, res) {
 
 // productStatusUpdate
 async function productStatusUpdate(req, res) {
-  console.log("productDelete", req.body)
+  console.log("productStatusUpdate", req.body)
 
   await db.Product.updateOne({ _id: req.body.id },
     {
-      status: req.body.status,
+      verified: "verifieds",
     }, function (err, result) {
       if (result) {
         return res.status(200).json({
@@ -832,6 +876,7 @@ async function BlogList(req, res) {
         id:data[i].id,
         title:data[i].title,
         paragraph:data[i].paragraph,
+        status:data[i].status,
         created_at:data[i].created_at
       })
   }
@@ -966,6 +1011,166 @@ async function BlogUpdate(req, res) {
 
 // Blog Delete
 async function BlogDelete(req, res) {
+  console.log("BlogDelete", req.body)
+
+  await db.Blog.updateOne({ _id: req.body.id },
+    {
+      status: "Inactive",
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
+// -------Comment------------
+
+//  CommentList 
+async function CommentList(req, res) {
+  console.log("BlogList", req.body)
+  const data = await comment.find({}).sort({ _id: -1 });
+  const list =[]
+  for(let i=0;data.length>i;++i){
+    
+      list.push({
+        id:data[i].id,
+        ratting:data[i].ratting,
+        comment:data[i].comment,
+        productId:data[i].productId,
+        userId:data[i].userId,
+        status:data[i].status,
+        created_at:data[i].created_at
+      })
+  }
+
+  return res.status(200).json({
+    data: list,
+    messgae: "success",
+    status: "1"
+  })
+}
+
+// addComment
+async function addComment(req, res) {
+  console.log("addBlog", req.body)
+  
+  const commentData = new comment({
+    ratting:req.body.ratting,
+    comment:req.body.comment,
+    productId:req.body.productId,
+    userId:req.body.userId,
+  });
+
+  db.Comment.create(commentData, async function (err, result) {
+    if (result) {
+      return res.status(200).json({
+        message: "success",
+        status: "1",
+      });
+    } else {
+      res.status(200).json({
+        message: "error",
+        status: "0",
+      });
+    }
+  });
+}
+
+// CommentById
+async function CommentById(req, res) {
+  console.log("BlogById", req.body)
+  if (__dirname == "/jinni/backend/jinni/controllers") {
+    var PicUrl = `${process.env.URL}/uploads/blog/`;
+  } else {
+    var PicUrl =
+      "http://" + req.get("host") + "/uploads/blog/";
+  }
+  const startOfWeek = new Date();
+        startOfWeek.setHours(0, 0, 0, 0);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    
+        const endOfWeek = new Date();
+        endOfWeek.setHours(23, 59, 59, 999);
+        endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
+    
+        const Products = await product.aggregate([
+          {
+            $match: {
+                created_at: {
+                $gte: startOfWeek,
+                $lte: endOfWeek,
+              },
+            },
+          },
+        ]);
+        const News = await news.aggregate([
+          {
+            $match: {
+                created_at: {
+                $gte: startOfWeek,
+                $lte: endOfWeek,
+              },
+            },
+          },
+        ]);
+  const data = await blog.findOne({ _id: req.body.id })
+   data.image=PicUrl+data.image
+  return res.status(200).json({
+    data: data,
+    Products:Products,
+    news:News,
+    messgae: "success",
+    status: "1"
+  })
+}
+
+// CommentUpdate
+async function CommentUpdate(req, res) {
+  console.log("BlogUpdate", req.body)
+
+  if (typeof files.image != "undefined") {
+    var images = "";
+    for (var j = 0; j < files.image.length; j++) {
+      var image_name = files.image[j].filename;
+      images += image_name + ",";
+      var image = images.replace(/,\s*$/, "");
+    }
+  } else {
+    var image = req.body.image;
+  }
+
+  await blog.updateOne({ _id: req.body.id },
+    {
+      title: req.body.title,
+      paragraph: req.body.paragraph,
+      imgae: image,
+      updated_at: new Date()
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
+
+// CommentDelete
+async function CommentDelete(req, res) {
   console.log("BlogDelete", req.body)
 
   await db.Blog.updateOne({ _id: req.body.id },

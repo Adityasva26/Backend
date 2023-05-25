@@ -24,6 +24,7 @@ router.get("/newsList",newsList);
 router.post("/newsById",newsById);
 router.post("/newsUpdate",uploadPhoto("news", [{ name: "image", maxCount: 1 }]),newsUpdate);
 router.post("/newsStatusUpdate",newsStatusUpdate)
+router.post("/newsdelete",newsdelete)
 // ----category--------
 router.post("/addcategory",addcategory);
 router.get("/categoryList",categoryList);
@@ -70,6 +71,8 @@ router.post("/sorting",sorting)
 router.post("/byTime",byTime)
 router.post("/byCategory",byCategory)
 router.post("/newsSorting",newsSorting)
+router.post("/CommentList",CommentList)
+router.post("/addComment",addComment)
 router.get("/test",test)
 module.exports = router;
 
@@ -171,6 +174,12 @@ function newsStatusUpdate(req, res,next){
   adminController
     .newsStatusUpdate(req, res)
     .then((data) => console.log("newsStatusUpdate"))
+    .catch((err) => next(err));
+}
+function newsdelete(req, res,next){
+  adminController
+    .newsdelete(req, res)
+    .then((data) => console.log("newsdelete"))
     .catch((err) => next(err));
 }
 
@@ -444,5 +453,19 @@ function newsSorting(req, res,next){
   userController
     .newsSorting(req, res)
     .then((data) => console.log("newsSorting"))
+    .catch((err) => next(err));
+}
+function addComment(req, res,next){
+  console.log("addComment")
+  adminController
+    .addComment(req, res)
+    .then((data) => console.log("addComment"))
+    .catch((err) => next(err));
+}
+function CommentList(req, res,next){
+  console.log("CommentList")
+  adminController
+    .CommentList(req, res)
+    .then((data) => console.log("CommentList"))
     .catch((err) => next(err));
 }

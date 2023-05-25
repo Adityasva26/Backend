@@ -45,6 +45,13 @@ function jwt() {
             '/api/futurePedia/byTime',
             '/api/futurePedia/byCategory',
             '/api/futurePedia/newsSorting',
+            '/api/futurePedia/productStatusUpdate',
+            '/api/futurePedia/newsdelete',
+            '/api/futurePedia/newsStatusUpdate',
+            '/api/futurePedia/BlogDelete',
+            '/api/futurePedia/BlogUpdate',
+            '/api/futurePedia/addComment',
+            '/api/futurePedia/CommentList',
             
         ]
     });

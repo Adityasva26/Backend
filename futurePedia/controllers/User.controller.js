@@ -13,6 +13,7 @@ const category = db.Category
 const feature = db.Feature
 const pricing = db.Pricing
 const favourites = db.Favourites
+const comment = db.Comment
 
 module.exports = {
     login,
@@ -312,6 +313,7 @@ async function HomePage(req, res) {
             data: FeatureList
         }
     ]
+    console.log("filter",PricingList)
     const products = []
     for (let i = 0; ProductList.length > i; ++i) {
         const pricing = await db.Pricing.findOne({ _id: ProductList[i].pricing_category })
@@ -326,12 +328,7 @@ async function HomePage(req, res) {
                 heartStatus = favourites.heart_status
             }
         }
-
-
-
-
-
-        
+        console.log("filter",heartStatus)
         products.push({
             title: ProductList[i].title,
             id: ProductList[i].id,
@@ -1255,3 +1252,4 @@ async function newsSorting(req, res) {
         status: "1"
     })
 }
+
