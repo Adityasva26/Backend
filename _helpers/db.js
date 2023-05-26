@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const config = require('config.json');
+const config = require('../config.json');
 
 try {
     const options = { useNewUrlParser: true, useUnifiedTopology: true };

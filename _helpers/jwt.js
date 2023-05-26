@@ -1,5 +1,5 @@
 const expressJwt = require('express-jwt');
-const config = require('config.json');
+const config = require('../config.json');
 const userService = require('../futurePedia/controllers/Admin.controller');
 module.exports = jwt;
 
@@ -52,6 +52,11 @@ function jwt() {
             '/api/futurePedia/BlogUpdate',
             '/api/futurePedia/addComment',
             '/api/futurePedia/CommentList',
+            '/api/futurePedia/CommentDelete',
+            '/api/futurePedia/categoryDelete',
+            '/api/futurePedia/categoryById',
+            '/api/futurePedia/categoryUpdate',
+            '/api/futurePedia/adminDashboard',
             
         ]
     });

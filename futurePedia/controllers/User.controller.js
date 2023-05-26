@@ -1,5 +1,5 @@
-const db = require("_helpers/db");
-const config = require("config.json");
+const db = require("../../_helpers/db");
+const config = require("../../config.json");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { productList } = require("./Admin.controller");
@@ -14,6 +14,7 @@ const feature = db.Feature
 const pricing = db.Pricing
 const favourites = db.Favourites
 const comment = db.Comment
+const blog = db.Blog
 
 module.exports = {
     login,
@@ -36,7 +37,8 @@ module.exports = {
     sorting,
     byTime,
     byCategory,
-    newsSorting
+    newsSorting,
+    adminDashboard
 }
 
 
@@ -83,6 +85,7 @@ async function login(req, res) {
                         Userdata = {
                             full_name: Users?.full_name,
                             email: Users?.email,
+                            role: Users?.role_id,
                             created_at: Users?.created_at,
                             id: Users?._id,
                         };
@@ -1252,4 +1255,22 @@ async function newsSorting(req, res) {
         status: "1"
     })
 }
+async function  adminDashboard (req,res){
+    const products = await product.find().count()
+    const users = await User.find().count()
+    const newss = await news.find().count()
+    const newsletters = await blog.find().count()
+    const categories = await category.find().count()
+    const comments = await comment.find().count()
 
+    return res.status(200).json({
+        products: products,
+        users: users,
+        newss: newss,
+        newsletters: newsletters,
+        categories: categories,
+        comments: comments,
+        message: "success",
+        status: "1"
+    })
+}

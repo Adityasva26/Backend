@@ -461,21 +461,23 @@ async function productById(req, res) {
    })
   }
   const CommentList = []
-  const comment = await db.Comment.find({_id:req.body.id})
+  const comment = await db.Comment.find({productId:req.body.id})
   for(let i=0;comment.length>i;++i){
-    const userTitle = await user.find({_id:comment[i].userId})
+    const userTitle = await user.findOne({_id:comment[i].userId})
 
     CommentList.push({
   ratting:comment[i].ratting,
   comment:comment[i].comment,
   productId:comment[i].productId,
-  userName:userTitle.fulll_name,
+  userName:userTitle.full_name,
+  created_at:userTitle.created_at,
  })
   }
   return res.status(200).json({
     data: productData,
     simmilarproduct:simmilarproduct,
     commentList:CommentList,
+    comment:comment,
     messgae: "success",
     status: "1"
   })
@@ -561,6 +563,8 @@ async function categoryList(req, res) {
     var productlength = await product.find({category:data[i].id})
     list.push({
       title:data[i].title,
+      type:data[i].type,
+      status:data[i].status,
       id:data[i].id,
       productCount:productlength.length
     })
@@ -576,7 +580,7 @@ async function categoryList(req, res) {
 
 // Add Category
 async function addcategory(req, res) {
-  console.log("addcategory", req.body)
+  console.log("addcategoryyyyy", req.body)
 
   const categoryData = new category({
     title: req.body.title,
@@ -590,6 +594,7 @@ async function addcategory(req, res) {
         status: "1",
       });
     } else {
+      console.log("err",err)
       res.status(200).json({
         message: "error",
         status: "0",
@@ -1039,13 +1044,14 @@ async function CommentList(req, res) {
   const data = await comment.find({}).sort({ _id: -1 });
   const list =[]
   for(let i=0;data.length>i;++i){
-    
+    const productName = await product.findOne({_id:data[i].productId})
+    const userName = await user.findOne({_id:data[i].userId})
       list.push({
         id:data[i].id,
         ratting:data[i].ratting,
         comment:data[i].comment,
-        productId:data[i].productId,
-        userId:data[i].userId,
+        productname:productName.title,
+        username:userName.full_name,
         status:data[i].status,
         created_at:data[i].created_at
       })

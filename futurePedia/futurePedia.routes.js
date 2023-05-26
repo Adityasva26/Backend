@@ -72,8 +72,10 @@ router.post("/byTime",byTime)
 router.post("/byCategory",byCategory)
 router.post("/newsSorting",newsSorting)
 router.post("/CommentList",CommentList)
+router.post("/CommentDelete",CommentDelete)
 router.post("/addComment",addComment)
 router.get("/test",test)
+router.get("/adminDashboard",adminDashboard)
 module.exports = router;
 
 
@@ -455,6 +457,13 @@ function newsSorting(req, res,next){
     .then((data) => console.log("newsSorting"))
     .catch((err) => next(err));
 }
+function adminDashboard(req, res,next){
+  console.log("adminDashboard")
+  userController
+    .adminDashboard(req, res)
+    .then((data) => console.log("adminDashboard"))
+    .catch((err) => next(err));
+}
 function addComment(req, res,next){
   console.log("addComment")
   adminController
@@ -467,5 +476,12 @@ function CommentList(req, res,next){
   adminController
     .CommentList(req, res)
     .then((data) => console.log("CommentList"))
+    .catch((err) => next(err));
+}
+function CommentDelete(req, res,next){
+  console.log("CommentDelete")
+  adminController
+    .CommentDelete(req, res)
+    .then((data) => console.log("CommentDelete"))
     .catch((err) => next(err));
 }
