@@ -430,6 +430,7 @@ async function productById(req, res) {
     created_at:data.created_at,
     id: data._id,
     image: PicUrl + data.image,
+    verified:data.verified
   };
   const categorybyproduct = await product.find({category:data.category})
   var simmilarproduct=[]
@@ -457,6 +458,7 @@ async function productById(req, res) {
     association: categorybyproduct[i].association,
     id: categorybyproduct[i]._id,
     image: PicUrl + categorybyproduct[i].image,
+    verified:categorybyproduct[i].verified
    
    })
   }

@@ -343,6 +343,7 @@ async function HomePage(req, res) {
             features: ProductList[i].features,
             pricing_category: pricing?.title,
             Favourites_count: ProductList[i]?.Favourites_count,
+            verified:ProductList[i].verified,
             price: ProductList[i].price,
             association: ProductList[i].association,
             image: PicUrl + ProductList[i].image,
