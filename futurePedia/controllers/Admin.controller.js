@@ -457,7 +457,7 @@ async function productById(req, res) {
     association: categorybyproduct[i].association,
     id: categorybyproduct[i]._id,
     image: PicUrl + categorybyproduct[i].image,
-    image: categorybyproduct[i].image,
+   
    })
   }
   const CommentList = []
