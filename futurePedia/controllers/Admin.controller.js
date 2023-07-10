@@ -399,7 +399,7 @@ async function productById(req, res) {
     var PicUrl = `${process.env.URL}/uploads/product/`;
   } else {
     var PicUrl =
-      "http://" + req.get("host") + "/uploads/product/";
+    "https://" + "api.findup.ai" + "/uploads/product/";
   }
   const data = await product.findOne({ _id: req.body.id })
   const features = await feature.findOne({ _id: data.features })
@@ -871,7 +871,7 @@ async function BlogList(req, res) {
     var PicUrl = `${process.env.URL}/uploads/blog/`;
   } else {
     var PicUrl =
-      "http://" + req.get("host") + "/uploads/blog/";
+    "https://" + "api.findup.ai" + "/uploads/blog/";
   }
   const data = await blog.find({}).sort({ _id: -1 });
   const list =[]
@@ -936,7 +936,7 @@ async function BlogById(req, res) {
     var PicUrl = `${process.env.URL}/uploads/blog/`;
   } else {
     var PicUrl =
-      "http://" + req.get("host") + "/uploads/blog/";
+    "https://" + "api.findup.ai" + "/uploads/blog/";
   }
   const startOfWeek = new Date();
         startOfWeek.setHours(0, 0, 0, 0);
@@ -1097,7 +1097,7 @@ async function CommentById(req, res) {
     var PicUrl = `${process.env.URL}/uploads/blog/`;
   } else {
     var PicUrl =
-      "http://" + req.get("host") + "/uploads/blog/";
+    "https://" + "api.findup.ai" + "/uploads/blog/";
   }
   const startOfWeek = new Date();
         startOfWeek.setHours(0, 0, 0, 0);

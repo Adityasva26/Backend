@@ -298,7 +298,7 @@ async function HomePage(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const FeatureList = await feature.find({ status: "Active" })
     const PricingList = await pricing.find({ status: "Active" })
@@ -376,7 +376,7 @@ async function detailPage(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const product = await product.findOne({ _id: req.body.id, status: "Active" })
 
@@ -591,7 +591,7 @@ async function favouritesList(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     var productdata = []
     const Favourites_list = await favourites.find({ user_id: req.body.id, status: "Active" })
@@ -717,7 +717,7 @@ async function filter(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
 
     if (param1 && param2 && param3) {
@@ -807,7 +807,7 @@ async function discover(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const data = await product.aggregate([{ $sample: { size: 1 } }])
     const features = await feature.findOne({ _id: data[0].features })
@@ -849,7 +849,7 @@ async function todayTools(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -964,7 +964,7 @@ async function productByCategory(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const FeatureList = await feature.find({ status: "Active" })
     const PricingList = await pricing.find({ status: "Active" })
@@ -1027,7 +1027,7 @@ async function sorting(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-            "http://" + req.get("host") + "/uploads/product/";
+        "https://" + "api.findup.ai" + "/uploads/product/";
     }
     console.log("sosorting", req.body)
     var ProductList = []
