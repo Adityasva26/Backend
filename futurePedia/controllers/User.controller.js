@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const { productList } = require("./Admin.controller");
 const Pricing = require("twilio/lib/rest/Pricing");
 const { Category } = require("../../_helpers/db");
+const { ObjectId } = require('mongoose').Types;
 var moment = require("moment");
 const User = db.User
 const product = db.Product
@@ -293,80 +294,70 @@ async function register(req, res) {
 
 //  HomePage Api
 async function HomePage(req, res) {
-    console.log("HomePage", req.body)
-    if (__dirname == "/jinni/backend/jinni/controllers") {
-        var PicUrl = `${process.env.URL}/uploads/product/`;
-    } else {
-        var PicUrl =
-            "https://" + "api.findup.ai" + "/uploads/product/";
-    }
-    const FeatureList = await feature.find({ status: "Active" })
-    const PricingList = await pricing.find({ status: "Active" })
-    const CategoryList = await category.find({ status: "Active", type: "product" })
-    const ProductList = await product.find({ status: "Active" }).sort({ _id: -1 })
-    // const todayProductCount = await product.find({ status: "Active", created_at: }).sort({_id:-1})
-
-    const filter = [
-        {
-            Header: "Pricing",
-            data: PricingList
-        },
-        {
-            Header: "Features",
-            data: FeatureList
-        }
-    ]
-    console.log("filter",PricingList)
-    const products = []
-    for (let i = 0; ProductList.length > i; ++i) {
-        const pricing = await db.Pricing.findOne({ _id: ProductList[i].pricing_category })
-        var heartStatus = ""
-        console.log("user_id", req.body.user_id)
-        if (req.body.user_id != undefined) {
-            console.log()
-            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: ProductList[i].id })
-            if (favourites == null) {
-                heartStatus = "0"
-            } else {
-                heartStatus = favourites.heart_status
-            }
-        }
-        console.log("filter",heartStatus)
-        products.push({
-            title: ProductList[i].title,
-            id: ProductList[i].id,
-            url: ProductList[i].url,
-            heartStatus: heartStatus,
-            category: ProductList[i].category,
-            short_discription: ProductList[i].short_discription,
-            discription: ProductList[i].discription,
-            features: ProductList[i].features,
-            pricing_category: pricing?.title,
-            Favourites_count: ProductList[i]?.Favourites_count,
-            verified:ProductList[i].verified,
-            price: ProductList[i].price,
-            association: ProductList[i].association,
-            image: PicUrl + ProductList[i].image,
-        })
-    }
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-
-    const todatproductcount = await product.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
-
-    const todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count()
-
-
-    return res.status(200).json({
-        data: products,
-        todatproductcount: todatproductcount,
-        todaynewscount: todaynewscount,
-        category: CategoryList,
-        Filter: filter,
-        message: "success",
-        status: "1"
-    })
+    try {
+        // Assuming your models have the required fields, adjust them accordingly
+        const FeatureList = await feature.find({ status: "Active" });
+        const PricingList = await pricing.find({ status: "Active" });
+        const CategoryList = await category.find({ status: "Active", type: "product" });
+    
+        // Find products with a created_at date range (adjust as needed)
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+        const ProductList = await product.find({ status: "Active", created_at: { $gte: startOfDay, $lt: endOfDay } }).sort({ _id: -1 });
+     console.log("ProductList",ProductList)
+        const PicUrl = __dirname === "/jinni/backend/jinni/controllers"
+          ? `${process.env.URL}/uploads/product/`
+          : "https://api.findup.ai/uploads/product/";
+    
+        const products = await Promise.all(ProductList.map(async (product) => {
+            console.log("product",product)
+            const isValidObjectId = ObjectId.isValid(product.pricing_category);
+          const pricings = isValidObjectId
+          ? await pricing.findOne({ _id: product.pricing_category })
+          : null;
+          const heartStatus = req.body.user_id !== undefined
+            ? (await favourites.findOne({ user_id: req.body.user_id, product_id: product.id }))?.heart_status ?? "0"
+            : "0";
+    
+          return {
+            title: product.title,
+            id: product.id,
+            url: product.url,
+            heartStatus,
+            category: product.category,
+            short_discription: product.short_discription,
+            discription: product.discription,
+            features: product.features,
+            pricing_category: pricings?.title,
+            Favourites_count: product.Favourites_count ?? 0,
+            verified: product.verified,
+            price: product.price,
+            association: product.association,
+            image: PicUrl + product.image,
+          };
+        }));
+    
+        const todatproductcount = await product.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count();
+        const todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count();
+    
+        // Return the response
+        res.status(200).json({
+          data: products,
+          todatproductcount,
+          todaynewscount,
+          category: CategoryList,
+          Filter: [
+            { Header: "Pricing", data: PricingList },
+            { Header: "Features", data: FeatureList }
+          ],
+          message: "success",
+          status: "1",
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error", status: "0" });
+      }
 
 }
 

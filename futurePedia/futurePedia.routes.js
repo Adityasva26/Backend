@@ -18,6 +18,7 @@ router.get("/productList",productList);
 router.post("/productById",productById);
 router.post("/productUpdate",uploadPhoto("product", [{ name: "image", maxCount: 1 }]),productUpdate);
 router.post("/productStatusUpdate",productStatusUpdate)
+router.post("/productDelete",productDelete)
 // ----news--------
 router.post("/addnews",uploadPhoto("news", [{ name: "image", maxCount: 1 }]),addnews);
 router.get("/newsList",newsList);
@@ -143,6 +144,12 @@ function productStatusUpdate(req, res,next){
   adminController
     .productStatusUpdate(req, res)
     .then((data) => console.log("productStatusUpdate"))
+    .catch((err) => next(err));
+}
+function productDelete(req, res,next){
+  adminController
+    .productDelete(req, res)
+    .then((data) => console.log("productDelete"))
     .catch((err) => next(err));
 }
 

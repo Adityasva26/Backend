@@ -23,6 +23,7 @@ module.exports = {
   productById,
   productUpdate,
   productStatusUpdate,
+  productDelete,
 
   newsList,
   addnews,
@@ -253,7 +254,7 @@ async function newsById(req, res) {
 // news Update
 async function newsUpdate(req, res) {
   console.log("newsUpdate", req.body)
-
+  var files = req.files;
   if (typeof files.image != "undefined") {
     var images = "";
     for (var j = 0; j < files.image.length; j++) {
@@ -264,12 +265,13 @@ async function newsUpdate(req, res) {
   } else {
     var image = req.body.image;
   }
-
+console.log(image)
   await news.updateOne({ _id: req.body.id },
     {
       title: req.body.title,
       url: req.body.url,
       category: req.body.category,
+      image:image,
       updated_at: new Date()
     }, function (err, result) {
       if (result) {
@@ -552,6 +554,28 @@ async function productStatusUpdate(req, res) {
   )
 }
 
+// news status Update
+async function productDelete(req, res) {
+  console.log("productDelete", req.body)
+
+  await db.Product.updateOne({ _id: req.body.id },
+    {
+      status: "Inactive",
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
 
 // -------Category------------
 

@@ -57,6 +57,9 @@ function jwt() {
             '/api/futurePedia/categoryById',
             '/api/futurePedia/categoryUpdate',
             '/api/futurePedia/adminDashboard',
+            '/api/futurePedia/newsById',
+            '/api/futurePedia/newsUpdate',
+            '/api/futurePedia/productDelete',
             
         ]
     });
