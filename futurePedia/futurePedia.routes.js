@@ -49,7 +49,7 @@ router.post("/PricingDelete",PricingDelete)
 router.get("/BlogList",BlogList);
 router.post("/addBlog",uploadPhoto("blog", [{ name: "image", maxCount: 1 }]),addBlog);
 router.post("/BlogById",BlogById);
-router.post("/BlogUpdate",BlogUpdate);
+router.post("/BlogUpdate",uploadPhoto("blog", [{ name: "image", maxCount: 1 }]),BlogUpdate);
 router.post("/BlogDelete",BlogDelete)
 
 

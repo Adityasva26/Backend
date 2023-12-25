@@ -74,7 +74,7 @@ module.exports = {
 async function userList(req, res) {
   console.log("userList", req.body)
 
-  const data = await user.find({}).sort({ _id: -1 });
+  const data = await user.find({status:"Active"}).sort({ _id: -1 });
 
   return res.status(200).json({
     data: data,
@@ -193,7 +193,7 @@ async function userDelete(req, res) {
 async function newsList(req, res) {
   console.log("newsList", req.body)
 
-  const data = await news.find({}).sort({ _id: -1 });
+  const data = await news.find({status:"Active"}).sort({ _id: -1 });
 
   return res.status(200).json({
     data: data,
@@ -343,7 +343,7 @@ async function newsdelete(req, res) {
 async function productList(req, res) {
   console.log("productList", req.body)
 
-  const data = await product.find({}).sort({ _id: -1 });
+  const data = await product.find({status:"Active"}).sort({ _id: -1 });
 
   return res.status(200).json({
     data: data,
@@ -601,7 +601,7 @@ async function productDelete(req, res) {
 async function categoryList(req, res) {
   console.log("categoryList", req.body)
 
-  const data = await category.find({}).sort({ _id: -1 });
+  const data = await category.find({status:"Active"}).sort({ _id: -1 });
   var list = []
   for(let i=0;data.length>i;++i){
     var productlength = await product.find({category:data[i].id})
@@ -714,7 +714,7 @@ async function categoryDelete(req, res) {
 async function FeatureList(req, res) {
   console.log("FeatureList", req.body)
 
-  const data = await feature.find({}).sort({ _id: -1 });
+  const data = await feature.find({status:"Active"}).sort({ _id: -1 });
 
   return res.status(200).json({
     data: data,
@@ -813,7 +813,7 @@ async function featureDelete(req, res) {
 async function PricingList(req, res) {
   console.log("pricingList", req.body)
 
-  const data = await pricing.find({}).sort({ _id: -1 });
+  const data = await pricing.find({status:"Active"}).sort({ _id: -1 });
 
   return res.status(200).json({
     data: data,
@@ -917,7 +917,7 @@ async function BlogList(req, res) {
     var PicUrl =
     "https://" + "api.findup.ai" + "/uploads/blog/";
   }
-  const data = await blog.find({}).sort({ _id: -1 });
+  const data = await blog.find({status:"Active"}).sort({ _id: -1 });
   const list =[]
   for(let i=0;data.length>i;++i){
       list.push({
@@ -1024,7 +1024,7 @@ async function BlogById(req, res) {
 // Blog Update
 async function BlogUpdate(req, res) {
   console.log("BlogUpdate", req.body)
-
+  var files = req.files;
   if (typeof files.image != "undefined") {
     var images = "";
     for (var j = 0; j < files.image.length; j++) {
