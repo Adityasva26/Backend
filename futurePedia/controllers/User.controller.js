@@ -114,117 +114,117 @@ async function login(req, res) {
 //  social Login Api
 async function socialregister(req, res) {
     try {
-     const   social_id = req.body.social_id==undefined?"":req.body.social_id
-    console.log("socialregisterewewewewe", social_id);
-    console.log("socialregisteuserexist", await User.findOne({ social_id: social_id }));
+        const social_id = req.body.social_id == undefined ? "" : req.body.social_id
+        console.log("socialregisterewewewewe", social_id);
+        console.log("socialregisteuserexist", await User.findOne({ social_id: social_id }));
 
-    if (req.body.email == "") {
-        return res.status(200).json({
-            message: "email is Required",
-            status: "0",
-        });
-    }
-    if (req.body.full_name == "") {
-        return res.status(200).json({
-            message: "First Name is Required",
-            status: "0",
-        });
-    }
+        if (req.body.email == "") {
+            return res.status(200).json({
+                message: "email is Required",
+                status: "0",
+            });
+        }
+        if (req.body.full_name == "") {
+            return res.status(200).json({
+                message: "First Name is Required",
+                status: "0",
+            });
+        }
 
-    if (req.body.social_name == "") {
-        return res.status(200).json({
-            message: "social_name is Required",
-            status: "0",
-        });
-    }
-    if (await User.findOne({ social_id: social_id })) {
-        console.log("Account Allready here", req.body);
-        var Socialdataresult = await User.findOne({
-            social_id: social_id,
-        });
+        if (req.body.social_name == "") {
+            return res.status(200).json({
+                message: "social_name is Required",
+                status: "0",
+            });
+        }
+        if (await User.findOne({ social_id: social_id })) {
+            console.log("Account Allready here", req.body);
+            var Socialdataresult = await User.findOne({
+                social_id: social_id,
+            });
 
-        const token = jwt.sign({ sub: Socialdataresult.id }, config.secret, {
-            expiresIn: "365d",
-        });
+            const token = jwt.sign({ sub: Socialdataresult.id }, config.secret, {
+                expiresIn: "365d",
+            });
 
-        db.User.updateOne(
-            { _id: Socialdataresult.id },
-            {
-                $set: {
-                    token: token,
-                },
-            },
-            async function (err, result) {
-                if (result) {
-                    var user = await User.findOne({ social_id: social_id });
-                    res.status(200).json({
-                        data: user,
-                        message: "Success",
-                        status: "1",
-                    });
-                } else {
-                    res.status(200).json({ message: "User Not Login", status: "0" });
-                }
-            }
-        );
-    } else {
-        console.log("Social Register login")
-        const payload = {
-            email: req.body.email,
-            full_name: req.body.full_name,
-            social_id: social_id,
-            social_name: req.body.social_name,
-        };
-        const token = jwt.sign(payload, config.secret, {
-            expiresIn: "365d",
-        });
-        const Userdatavalue = new User({
-            email: req.body.email,
-            full_name: req.body.full_name,
-            social_id: social_id,
-            social_name: req.body.social_name,
-            token: token,
-        });
-        await User.create(Userdatavalue, async function (err, result) {
-            if (result) {
-                const user = await User.findOne({ social_id: social_id });
-                console.log("Add User Done");
-                const token = jwt.sign({ sub: user.id }, config.secret, {
-                    expiresIn: "365d",
-                });
-                await User.updateOne(
-                    { _id: user.id },
-                    {
-                        $set: {
-                            remember_token: token,
-                        },
+            db.User.updateOne(
+                { _id: Socialdataresult.id },
+                {
+                    $set: {
+                        token: token,
                     },
-                    async function (err, result) {
-                        if (result) {
-                            var user = await User.findOne({
-                                social_id: social_id,
-                            });
-                            return res.status(200).json({
-                                message: "Success",
-                                data: user,
-                                status: "1",
-                            });
-                        } else {
-                            return res
-                                .status(200)
-                                .json({ message: "User Not Login", status: "0" });
-                        }
+                },
+                async function (err, result) {
+                    if (result) {
+                        var user = await User.findOne({ social_id: social_id });
+                        res.status(200).json({
+                            data: user,
+                            message: "Success",
+                            status: "1",
+                        });
+                    } else {
+                        res.status(200).json({ message: "User Not Login", status: "0" });
                     }
-                );
-            } else {
-                console.log("Add User", err);
-                return res.status(200).json({
-                    message: "Register " + req.body.email + " Allready",
-                    status: "0",
-                });
-            }
-        });
-    }
+                }
+            );
+        } else {
+            console.log("Social Register login")
+            const payload = {
+                email: req.body.email,
+                full_name: req.body.full_name,
+                social_id: social_id,
+                social_name: req.body.social_name,
+            };
+            const token = jwt.sign(payload, config.secret, {
+                expiresIn: "365d",
+            });
+            const Userdatavalue = new User({
+                email: req.body.email,
+                full_name: req.body.full_name,
+                social_id: social_id,
+                social_name: req.body.social_name,
+                token: token,
+            });
+            await User.create(Userdatavalue, async function (err, result) {
+                if (result) {
+                    const user = await User.findOne({ social_id: social_id });
+                    console.log("Add User Done");
+                    const token = jwt.sign({ sub: user.id }, config.secret, {
+                        expiresIn: "365d",
+                    });
+                    await User.updateOne(
+                        { _id: user.id },
+                        {
+                            $set: {
+                                remember_token: token,
+                            },
+                        },
+                        async function (err, result) {
+                            if (result) {
+                                var user = await User.findOne({
+                                    social_id: social_id,
+                                });
+                                return res.status(200).json({
+                                    message: "Success",
+                                    data: user,
+                                    status: "1",
+                                });
+                            } else {
+                                return res
+                                    .status(200)
+                                    .json({ message: "User Not Login", status: "0" });
+                            }
+                        }
+                    );
+                } else {
+                    console.log("Add User", err);
+                    return res.status(200).json({
+                        message: "Register " + req.body.email + " Allready",
+                        status: "0",
+                    });
+                }
+            });
+        }
     } catch (err) {
         console.log("social login failed", err);
         res.status(200).json({
@@ -275,13 +275,13 @@ async function register(req, res) {
     });
 
 
-    
+
     await User.create(Userdatavalue, async function (err, result) {
         const user = await User.findOne({ email: req.body.email });
         if (result) {
             return res.status(200).json({
-                message: "Success", 
-                data : user,
+                message: "Success",
+                data: user,
                 status: "1",
             });
         } else {
@@ -299,67 +299,68 @@ async function HomePage(req, res) {
         const FeatureList = await feature.find({ status: "Active" });
         const PricingList = await pricing.find({ status: "Active" });
         const CategoryList = await category.find({ status: "Active", type: "product" });
-    
+
         // Find products with a created_at date range (adjust as needed)
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-        const ProductList = await product.find({ status: "Active"
-        //  created_at: { $gte: startOfDay, $lt: endOfDay } 
+        const ProductList = await product.find({
+            status: "Active"
+            //  created_at: { $gte: startOfDay, $lt: endOfDay } 
         }).sort({ _id: -1 });
-     console.log("ProductList",ProductList)
+        console.log("ProductList", ProductList)
         const PicUrl = __dirname === "/jinni/backend/jinni/controllers"
-          ? `${process.env.URL}/uploads/product/`
-          : "https://api.findup.ai/uploads/product/";
-    
+            ? `${process.env.URL}/uploads/product/`
+            : "https://api.findup.ai/uploads/product/";
+
         const products = await Promise.all(ProductList.map(async (product) => {
-            console.log("product",product)
+            console.log("product", product)
             const isValidObjectId = ObjectId.isValid(product.pricing_category);
-          const pricings = isValidObjectId
-          ? await pricing.findOne({ _id: product.pricing_category })
-          : null;
-          const heartStatus = req.body.user_id !== undefined
-            ? (await favourites.findOne({ user_id: req.body.user_id, product_id: product.id }))?.heart_status ?? "0"
-            : "0";
-    
-          return {
-            title: product.title,
-            id: product.id,
-            url: product.url,
-            heartStatus,
-            category: product.category,
-            short_discription: product.short_discription,
-            discription: product.discription,
-            features: product.features,
-            pricing_category: pricings?.title,
-            Favourites_count: product.Favourites_count ?? 0,
-            verified: product.verified,
-            price: product.price,
-            association: product.association,
-            image: PicUrl + product.image,
-          };
+            const pricings = isValidObjectId
+                ? await pricing.findOne({ _id: product.pricing_category })
+                : null;
+            const heartStatus = req.body.user_id !== undefined
+                ? (await favourites.findOne({ user_id: req.body.user_id, product_id: product.id }))?.heart_status ?? "0"
+                : "0";
+
+            return {
+                title: product.title,
+                id: product.id,
+                url: product.url,
+                heartStatus,
+                category: product.category,
+                short_discription: product.short_discription,
+                discription: product.discription,
+                features: product.features,
+                pricing_category: pricings?.title,
+                Favourites_count: product.Favourites_count ?? 0,
+                verified: product.verified,
+                price: product.price,
+                association: product.association,
+                image: PicUrl + product.image,
+            };
         }));
-    
+
         const todatproductcount = await product.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count();
         const todaynewscount = await news.find({ created_at: { $gte: startOfDay, $lt: endOfDay } }).count();
-    
+
         // Return the response
         res.status(200).json({
-          data: products,
-          todatproductcount,
-          todaynewscount,
-          category: CategoryList,
-          Filter: [
-            { Header: "Pricing", data: PricingList },
-            { Header: "Features", data: FeatureList }
-          ],
-          message: "success",
-          status: "1",
+            data: products,
+            todatproductcount,
+            todaynewscount,
+            category: CategoryList,
+            Filter: [
+                { Header: "Pricing", data: PricingList },
+                { Header: "Features", data: FeatureList }
+            ],
+            message: "success",
+            status: "1",
         });
-      } catch (error) {
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error", status: "0" });
-      }
+    }
 
 }
 
@@ -370,43 +371,87 @@ async function detailPage(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
-    const product = await product.findOne({ _id: req.body.id, status: "Active" })
-
-    const data = {
-        title: product.title,
-        url: product.url,
-        category: product.category,
-        short_discription: product.short_discription,
-        discription: product.discription,
-        features: product.features,
-        pricing_category: product.pricing_category,
-        price: product.price,
-        association: product.association,
-        image: PicUrl + product.image,
+    const data = await product.findOne({ _id: req.body.id })
+    const features = await feature.findOne({ _id: data.features })
+    const categoryTitle = await category.findOne({ _id: data.category })
+    const price = await pricing.findOne({ _id: data.pricing_category })
+    console.log("feature", features.title)
+    if (req.body.user_id != undefined) {
+        console.log()
+        var heartStatus1 = ""
+        const favourites1 = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: data.id })
+        if (favourites1 == null) {
+            heartStatus1 = "0"
+        } else {
+            heartStatus1 = favourites1.heart_status
+        }
     }
+    const productData = {
+        title: data.title,
+        url: data.url,
+        category: categoryTitle.title,
+        heartStatus: heartStatus1,
+        short_discription: data.short_discription,
+        discription: data.discription,
+        features: features.title,
+        pricing_category: price.title,
+        price: data.price,
+        association: data.association,
+        created_at: data.created_at,
+        id: data._id,
+        image: PicUrl + data.image,
+        verified: data.verified
+    };
+    const categorybyproduct = await product.find({ category: data.category, status: "Active" })
+    var simmilarproduct = []
+    for (let i = 0; categorybyproduct.length > i; ++i) {
+        if (req.body.user_id != undefined) {
+            console.log()
+            var heartStatus = ""
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: categorybyproduct[i].id })
+            if (favourites == null) {
+                heartStatus = "0"
+            } else {
+                heartStatus = favourites.heart_status
+            }
+        }
+        simmilarproduct.push({
+            title: categorybyproduct[i].title,
+            url: categorybyproduct[i].url,
+            category: categoryTitle.title,
+            heartStatus: heartStatus,
+            short_discription: categorybyproduct[i].short_discription,
+            discription: categorybyproduct[i].discription,
+            features: features.title,
+            pricing_category: price.title,
+            price: categorybyproduct[i].price,
+            association: categorybyproduct[i].association,
+            id: categorybyproduct[i]._id,
+            image: PicUrl + categorybyproduct[i].image,
+            images: categorybyproduct[i].image,
+            verified: categorybyproduct[i].verified
 
-    const simmilarProductlist = await product.find({ category: product.category }).limit(5)
-    const simmilarProduct = []
-    for (let i = 0; simmilarProductlist.length > i; ++i) {
-        simmilarProduct.push({
-            title: simmilarProductlist[i].title,
-            url: simmilarProductlist[i].url,
-            category: simmilarProductlist[i].category,
-            short_discription: simmilarProductlist[i].short_discription,
-            discription: simmilarProductlist[i].discription,
-            features: simmilarProductlist[i].features,
-            pricing_category: simmilarProductlist[i].pricing_category,
-            price: simmilarProductlist[i].price,
-            association: simmilarProductlist[i].association,
-            image: PicUrl + simmilarProductlist[i].image,
         })
     }
+    const CommentList = []
+    const comment = await db.Comment.find({ productId: req.body.id })
+    for (let i = 0; comment.length > i; ++i) {
+        const userTitle = await user.findOne({ _id: comment[i].userId })
 
+        CommentList.push({
+            ratting: comment[i].ratting,
+            comment: comment[i].comment,
+            productId: comment[i].productId,
+            userName: userTitle.full_name,
+            created_at: userTitle.created_at,
+        })
+    }
     return res.status(200).json({
-        data: data,
-        simmilarProduct: simmilarProduct,
+        data: productData,
+
+        simmilarProduct: simmilarproduct,
         message: "success",
         status: "1"
     })
@@ -585,7 +630,7 @@ async function favouritesList(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     var productdata = []
     const Favourites_list = await favourites.find({ user_id: req.body.id, status: "Active" })
@@ -711,7 +756,7 @@ async function filter(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
 
     if (param1 && param2 && param3) {
@@ -801,7 +846,7 @@ async function discover(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const data = await product.aggregate([{ $sample: { size: 1 } }])
     const features = await feature.findOne({ _id: data[0].features })
@@ -843,7 +888,7 @@ async function todayTools(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const today = new Date();
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -958,7 +1003,7 @@ async function productByCategory(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const FeatureList = await feature.find({ status: "Active" })
     const PricingList = await pricing.find({ status: "Active" })
@@ -1021,7 +1066,7 @@ async function sorting(req, res) {
         var PicUrl = `${process.env.URL}/uploads/product/`;
     } else {
         var PicUrl =
-        "https://" + "api.findup.ai" + "/uploads/product/";
+            "https://" + "api.findup.ai" + "/uploads/product/";
     }
     console.log("sosorting", req.body)
     var ProductList = []
@@ -1249,7 +1294,7 @@ async function newsSorting(req, res) {
         status: "1"
     })
 }
-async function  adminDashboard (req,res){
+async function adminDashboard(req, res) {
     const products = await product.find().count()
     const users = await User.find().count()
     const newss = await news.find().count()

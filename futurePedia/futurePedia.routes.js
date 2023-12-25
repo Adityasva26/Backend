@@ -78,6 +78,7 @@ router.post("/CommentDelete",CommentDelete)
 router.post("/addComment",addComment)
 router.get("/test",test)
 router.get("/adminDashboard",adminDashboard)
+router.post("/detailPage",detailPage)
 module.exports = router;
 
 
@@ -496,5 +497,12 @@ function CommentDelete(req, res,next){
   adminController
     .CommentDelete(req, res)
     .then((data) => console.log("CommentDelete"))
+    .catch((err) => next(err));
+}
+function detailPage(req, res,next){
+  console.log("detailPage")
+  userController
+    .detailPage(req, res)
+    .then((data) => console.log("detailPage"))
     .catch((err) => next(err));
 }
