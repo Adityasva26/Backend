@@ -665,7 +665,7 @@ async function categoryUpdate(req, res) {
   console.log("categoryUpdate", req.body)
 
 
-  await product.updateOne({ _id: req.body.id },
+  await category.updateOne({ _id: req.body.id },
     {
       title: req.body.title,
       type: req.body.type,
