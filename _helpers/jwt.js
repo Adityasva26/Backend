@@ -60,6 +60,8 @@ function jwt() {
             '/api/futurePedia/newsById',
             '/api/futurePedia/newsUpdate',
             '/api/futurePedia/productDelete',
+            '/api/futurePedia/productUpdate',
+            '/api/futurePedia/productforid',
             
         ]
     });

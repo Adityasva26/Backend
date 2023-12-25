@@ -16,6 +16,7 @@ router.post("/userDelete",userDelete)
 router.post("/addproduct",uploadPhoto("product", [{ name: "image", maxCount: 1 }]),addproduct);
 router.get("/productList",productList);
 router.post("/productById",productById);
+router.post("/productforid",productforid);
 router.post("/productUpdate",uploadPhoto("product", [{ name: "image", maxCount: 1 }]),productUpdate);
 router.post("/productStatusUpdate",productStatusUpdate)
 router.post("/productDelete",productDelete)
@@ -133,6 +134,11 @@ function productById(req, res,next){
   adminController
     .productById(req, res)
     .then((data) => console.log("productById"))
+    .catch((err) => next(err));}
+function productforid(req, res,next){
+  adminController
+    .productforid(req, res)
+    .then((data) => console.log("productforid"))
     .catch((err) => next(err));}
 function productUpdate(req, res,next){
   adminController

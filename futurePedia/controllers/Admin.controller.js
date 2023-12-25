@@ -21,6 +21,7 @@ module.exports = {
   productList,
   addproduct,
   productById,
+  productforid,
   productUpdate,
   productStatusUpdate,
   productDelete,
@@ -460,6 +461,7 @@ async function productById(req, res) {
     association: categorybyproduct[i].association,
     id: categorybyproduct[i]._id,
     image: PicUrl + categorybyproduct[i].image,
+    images:categorybyproduct[i].image,
     verified:categorybyproduct[i].verified
    
    })
@@ -487,10 +489,25 @@ async function productById(req, res) {
   })
 }
 
+async function productforid(req,res){
+  try {
+    const data = await product.findOne({ _id: req.body.id })
+    return res.status(200).json({
+      data:data,
+      messgae: "success",
+      status: "1"
+    })
+  } catch (error) {
+    return res.status(500).json({
+      messgae: "error",
+      status: "0"
+    })
+  }
+}
 // product Update
 async function productUpdate(req, res) {
   console.log("productUpdate", req.body)
-
+  var files = req.files;
   if (typeof files.image != "undefined") {
     var images = "";
     for (var j = 0; j < files.image.length; j++) {
@@ -522,6 +539,7 @@ async function productUpdate(req, res) {
           status: "1",
         });
       } else {
+        console.log(err)
         return res.status(200).json({
           message: "Error",
           status: "0",

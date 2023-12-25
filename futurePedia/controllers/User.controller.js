@@ -82,7 +82,7 @@ async function login(req, res) {
                 },
                 async function (err, result) {
                     if (result) {
-                        const Users = await User.findOne({ email: req.body.email });
+                        const Users = await User.findOne({ email: req.body.email.toLowerCase() });
                         Userdata = {
                             full_name: Users?.full_name,
                             email: Users?.email,
@@ -304,7 +304,9 @@ async function HomePage(req, res) {
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-        const ProductList = await product.find({ status: "Active", created_at: { $gte: startOfDay, $lt: endOfDay } }).sort({ _id: -1 });
+        const ProductList = await product.find({ status: "Active"
+        //  created_at: { $gte: startOfDay, $lt: endOfDay } 
+        }).sort({ _id: -1 });
      console.log("ProductList",ProductList)
         const PicUrl = __dirname === "/jinni/backend/jinni/controllers"
           ? `${process.env.URL}/uploads/product/`
