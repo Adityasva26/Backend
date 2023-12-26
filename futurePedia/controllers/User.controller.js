@@ -374,10 +374,11 @@ async function detailPage(req, res) {
             "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const data = await product.findOne({ _id: req.body.id })
-    const features = await feature.findOne({ _id: data.features })
+    console.log(data)
+    const features = await feature.findOne({ _id: data?.features })
     const categoryTitle = await category.findOne({ _id: data.category })
     const price = await pricing.findOne({ _id: data.pricing_category })
-    console.log("feature", features.title)
+    console.log("feature", features?.title)
     if (req.body.user_id != undefined) {
         console.log()
         var heartStatus1 = ""
@@ -395,7 +396,7 @@ async function detailPage(req, res) {
         heartStatus: heartStatus1,
         short_discription: data.short_discription,
         discription: data.discription,
-        features: features.title,
+        features: features?.title,
         pricing_category: price.title,
         price: data.price,
         association: data.association,
@@ -404,7 +405,7 @@ async function detailPage(req, res) {
         image: PicUrl + data.image,
         verified: data.verified
     };
-    const categorybyproduct = await product.find({ category: data.category, status: "Active" })
+    const categorybyproduct = await product.find({ category: data?.category, status: "Active" })
     var simmilarproduct = []
     for (let i = 0; categorybyproduct.length > i; ++i) {
         if (req.body.user_id != undefined) {
@@ -424,7 +425,7 @@ async function detailPage(req, res) {
             heartStatus: heartStatus,
             short_discription: categorybyproduct[i].short_discription,
             discription: categorybyproduct[i].discription,
-            features: features.title,
+            features: features?.title,
             pricing_category: price.title,
             price: categorybyproduct[i].price,
             association: categorybyproduct[i].association,
