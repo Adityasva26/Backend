@@ -439,7 +439,7 @@ async function detailPage(req, res) {
     const CommentList = []
     const comment = await db.Comment.find({ productId: req.body.id })
     for (let i = 0; comment.length > i; ++i) {
-        const userTitle = await user.findOne({ _id: comment[i].userId })
+        const userTitle = await User.findOne({ _id: comment[i].userId })
 
         CommentList.push({
             ratting: comment[i].ratting,
@@ -451,7 +451,7 @@ async function detailPage(req, res) {
     }
     return res.status(200).json({
         data: productData,
-
+        CommentList:CommentList,
         simmilarProduct: simmilarproduct,
         message: "success",
         status: "1"
@@ -850,9 +850,9 @@ async function discover(req, res) {
             "https://" + "api.findup.ai" + "/uploads/product/";
     }
     const data = await product.aggregate([{ $sample: { size: 1 } }])
-    const features = await feature.findOne({ _id: data[0].features })
-    const price = await pricing.findOne({ _id: data[0].pricing_category })
-    const categorytitle = await category.findOne({ _id: data[0].category })
+    const features = await feature.findOne({ _id: data[0]?.features })
+    const price = await pricing.findOne({ _id: data[0]?.pricing_category })
+    const categorytitle = await category.findOne({ _id: data[0]?.category })
     if (req.body.user_id != undefined) {
         console.log()
         var heartStatus = ""
@@ -867,7 +867,7 @@ async function discover(req, res) {
         title: data[0]?.title,
         url: data[0]?.url,
         heartStatus: heartStatus,
-        category: categorytitle.title,
+        category: categorytitle?.title,
         short_discription: data[0]?.short_discription,
         discription: data[0]?.discription,
         features: features?.title,
@@ -877,8 +877,54 @@ async function discover(req, res) {
         id: data[0]?._id,
         image: PicUrl + data[0]?.image,
     };
+    const categorybyproduct = await product.find({ category: data[0]?.category, status: "Active" })
+    var simmilarproduct = []
+    for (let i = 0; categorybyproduct.length > i; ++i) {
+        if (req.body.user_id != undefined) {
+            console.log()
+            var heartStatus = ""
+            const favourites = await db.Favourites.findOne({ user_id: req.body.user_id, product_id: categorybyproduct[i].id })
+            if (favourites == null) {
+                heartStatus = "0"
+            } else {
+                heartStatus = favourites.heart_status
+            }
+        }
+        simmilarproduct.push({
+            title: categorybyproduct[i].title,
+            url: categorybyproduct[i].url,
+            category: categorytitle.title,
+            heartStatus: heartStatus,
+            short_discription: categorybyproduct[i].short_discription,
+            discription: categorybyproduct[i].discription,
+            features: features?.title,
+            pricing_category: price.title,
+            price: categorybyproduct[i].price,
+            association: categorybyproduct[i].association,
+            id: categorybyproduct[i]._id,
+            image: PicUrl + categorybyproduct[i].image,
+            images: categorybyproduct[i].image,
+            verified: categorybyproduct[i].verified
+
+        })
+    }
+    const CommentList = []
+    const comment = await db.Comment.find({ productId: req.body.id })
+    for (let i = 0; comment.length > i; ++i) {
+        const userTitle = await User.findOne({ _id: comment[i].userId })
+
+        CommentList.push({
+            ratting: comment[i].ratting,
+            comment: comment[i].comment,
+            productId: comment[i].productId,
+            userName: userTitle.full_name,
+            created_at: userTitle.created_at,
+        })
+    }
     return res.status(200).json({
         data: productData,
+        CommentList:CommentList,
+        simmilarproduct:simmilarproduct,
         messgae: "success",
         status: "1"
     })
