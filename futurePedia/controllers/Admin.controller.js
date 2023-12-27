@@ -469,14 +469,14 @@ async function productById(req, res) {
   const CommentList = []
   const comment = await db.Comment.find({productId:req.body.id})
   for(let i=0;comment.length>i;++i){
-    const userTitle = await user.findOne({_id:comment[i].userId})
+    const userTitle = await user.findOne({_id:comment[i]?.userId})
 
     CommentList.push({
-  ratting:comment[i].ratting,
-  comment:comment[i].comment,
-  productId:comment[i].productId,
-  userName:userTitle.full_name,
-  created_at:userTitle.created_at,
+  ratting:comment[i]?.ratting,
+  comment:comment[i]?.comment,
+  productId:comment[i]?.productId,
+  userName:userTitle?.full_name,
+  created_at:userTitle?.created_at,
  })
   }
   return res.status(200).json({
@@ -1085,19 +1085,19 @@ async function BlogDelete(req, res) {
 //  CommentList 
 async function CommentList(req, res) {
   console.log("BlogList", req.body)
-  const data = await comment.find({}).sort({ _id: -1 });
+  const data = await comment.find({status:"Active"}).sort({ _id: -1 });
   const list =[]
   for(let i=0;data.length>i;++i){
-    const productName = await product.findOne({_id:data[i].productId})
-    const userName = await user.findOne({_id:data[i].userId})
+    const productName = await product.findOne({_id:data[i]?.productId})
+    const userName = await user.findOne({_id:data[i]?.userId})
       list.push({
-        id:data[i].id,
-        ratting:data[i].ratting,
-        comment:data[i].comment,
-        productname:productName.title,
-        username:userName.full_name,
-        status:data[i].status,
-        created_at:data[i].created_at
+        id:data[i]?.id,
+        ratting:data[i]?.ratting,
+        comment:data[i]?.comment,
+        productname:productName?.title,
+        username:userName?.full_name,
+        status:data[i]?.status,
+        created_at:data[i]?.created_at
       })
   }
 
@@ -1197,7 +1197,7 @@ async function CommentUpdate(req, res) {
     var image = req.body.image;
   }
 
-  await blog.updateOne({ _id: req.body.id },
+  await db.Comment.updateOne({ _id: req.body.id },
     {
       title: req.body.title,
       paragraph: req.body.paragraph,
@@ -1223,7 +1223,7 @@ async function CommentUpdate(req, res) {
 async function CommentDelete(req, res) {
   console.log("BlogDelete", req.body)
 
-  await db.Blog.updateOne({ _id: req.body.id },
+  await db.Comment.updateOne({ _id: req.body.id },
     {
       status: "Inactive",
     }, function (err, result) {
