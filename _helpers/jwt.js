@@ -63,6 +63,11 @@ function jwt() {
             '/api/futurePedia/productUpdate',
             '/api/futurePedia/productforid',
             '/api/futurePedia/detailPage',
+            '/api/futurePedia/DealList',
+            '/api/futurePedia/addDeal',
+            '/api/futurePedia/DealById',
+            '/api/futurePedia/DealUpdate',
+            '/api/futurePedia/DealDelete',
             
         ]
     });

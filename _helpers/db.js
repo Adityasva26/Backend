@@ -27,5 +27,6 @@ module.exports = {
     Pricing: require("../futurePedia/models/pricing.model"),
     Blog: require("../futurePedia/models/blog.model"),
     Comment: require("../futurePedia/models/comment.model"),
+    Deal: require("../futurePedia/models/deal.model"),
 
 };

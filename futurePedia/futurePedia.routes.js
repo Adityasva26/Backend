@@ -51,6 +51,12 @@ router.post("/addBlog",uploadPhoto("blog", [{ name: "image", maxCount: 1 }]),add
 router.post("/BlogById",BlogById);
 router.post("/BlogUpdate",uploadPhoto("blog", [{ name: "image", maxCount: 1 }]),BlogUpdate);
 router.post("/BlogDelete",BlogDelete)
+// ----Deal--------
+router.get("/DealList",DealList);
+router.post("/addDeal",uploadPhoto("Deal", [{ name: "image", maxCount: 1 }]),addDeal);
+router.post("/DealById",DealById);
+router.post("/DealUpdate",uploadPhoto("Deal", [{ name: "image", maxCount: 1 }]),DealUpdate);
+router.post("/DealDelete",DealDelete)
 
 
 
@@ -330,6 +336,37 @@ function BlogDelete(req, res,next){
   adminController
     .BlogDelete(req, res)
     .then((data) => console.log("BlogDelete"))
+    .catch((err) => next(err));
+}
+// ----Deal--------
+
+function addDeal(req, res,next){
+  adminController
+    .addDeal(req, res)
+    .then((data) => console.log("addBlog"))
+    .catch((err) => next(err));
+}
+function DealList(req, res,next){
+  adminController
+    .DealList(req, res)
+    .then((data) => console.log("DealList"))
+    .catch((err) => next(err));
+}
+function DealById(req, res,next){
+  adminController
+    .DealById(req, res)
+    .then((data) => console.log("DealById"))
+    .catch((err) => next(err));}
+function DealUpdate(req, res,next){
+  adminController
+    .DealUpdate(req, res)
+    .then((data) => console.log("DealUpdate"))
+    .catch((err) => next(err));
+}
+function DealDelete(req, res,next){
+  adminController
+    .DealDelete(req, res)
+    .then((data) => console.log("DealDelete"))
     .catch((err) => next(err));
 }
 

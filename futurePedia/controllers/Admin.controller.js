@@ -59,6 +59,12 @@ module.exports = {
   BlogById,
   BlogUpdate,
   BlogDelete,
+
+  DealList,
+  addDeal,
+  DealById,
+  DealUpdate,
+  DealDelete,
   
   CommentList,
   addComment,
@@ -1063,6 +1069,156 @@ async function BlogDelete(req, res) {
   console.log("BlogDelete", req.body)
 
   await db.Blog.updateOne({ _id: req.body.id },
+    {
+      status: "Inactive",
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
+// -------Deal------------
+
+//  DealList 
+async function DealList(req, res) {
+  console.log("BlogList", req.body)
+  if (__dirname == "/jinni/backend/jinni/controllers") {
+    var PicUrl = `${process.env.URL}/uploads/deal/`;
+  } else {
+    var PicUrl =
+    "https://" + "api.findup.ai" + "/uploads/deal/";
+  }
+  const data = await db.Deal.find({status:"Active"}).sort({ _id: -1 });
+  const list =[]
+  for(let i=0;data.length>i;++i){
+      list.push({
+        image:PicUrl+data[i].image,
+        id:data[i].id,
+        title:data[i].title,
+        paragraph:data[i].paragraph,
+        link:data[i].link,
+        like:data[i].like,
+        star:data[i].star,
+        status:data[i].status,
+        created_at:data[i].created_at
+      })
+  }
+
+  return res.status(200).json({
+    data: list,
+    messgae: "success",
+    status: "1"
+  })
+}
+
+// Add deal
+async function addDeal(req, res) {
+  console.log("addDeal", req.body)
+  var files = req.files;
+  if (typeof files.image != "undefined") {
+    var images = "";
+    for (var j = 0; j < files.image.length; j++) {
+      var image_name = files.image[j].filename;
+      images += image_name + ",";
+      var image = images.replace(/,\s*$/, "");
+    }
+  } else {
+    var image = req.body.image;
+  }
+
+  const dealData = new db.Deal({
+    title: req.body.title,
+    paragraph: req.body.paragraph,
+    link: req.body.link,
+    image: image,
+  });
+
+  db.Deal.create(dealData, async function (err, result) {
+    if (result) {
+      return res.status(200).json({
+        message: "success",
+        status: "1",
+      });
+    } else {
+      res.status(200).json({
+        message: "error",
+        status: "0",
+      });
+    }
+  });
+}
+
+// Deal by id
+async function DealById(req, res) {
+  console.log("DealbyId", req.body)
+  if (__dirname == "/jinni/backend/jinni/controllers") {
+    var PicUrl = `${process.env.URL}/uploads/Deal/`;
+  } else {
+    var PicUrl =
+    "https://" + "api.findup.ai" + "/uploads/Deal/";
+  }
+  const data = await db.Deal.findOne({ _id: req.body.id })
+   data.image=PicUrl+data?.image
+  return res.status(200).json({
+    data: data,
+    messgae: "success",
+    status: "1"
+  })
+}
+
+// Deal Update
+async function DealUpdate(req, res) {
+  console.log("DeaUpdate", req.body)
+  var files = req.files;
+  if (typeof files.image != "undefined") {
+    var images = "";
+    for (var j = 0; j < files.image.length; j++) {
+      var image_name = files.image[j].filename;
+      images += image_name + ",";
+      var image = images.replace(/,\s*$/, "");
+    }
+  } else {
+    var image = req.body.image;
+  }
+
+  await db.Deal.updateOne({ _id: req.body.id },
+    {
+      title: req.body.title,
+      paragraph: req.body.paragraph,
+      link: req.body.link,
+  
+      imgae: image,
+      updated_at: new Date()
+    }, function (err, result) {
+      if (result) {
+        return res.status(200).json({
+          message: "success",
+          status: "1",
+        });
+      } else {
+        return res.status(200).json({
+          message: "Error",
+          status: "0",
+        });
+      }
+    }
+  )
+}
+
+// Deal Delete
+async function DealDelete(req, res) {
+  console.log("DealDelete", req.body)
+
+  await db.Deal.updateOne({ _id: req.body.id },
     {
       status: "Inactive",
     }, function (err, result) {
