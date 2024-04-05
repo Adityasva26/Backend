@@ -1105,6 +1105,9 @@ async function DealList(req, res) {
         id:data[i].id,
         title:data[i].title,
         paragraph:data[i].paragraph,
+        price: data[i].price,
+        discountedPrice: data[i].discountedPrice,
+        discountCode: data[i].discountCode,
         link:data[i].link,
         like:data[i].like,
         star:data[i].star,
@@ -1138,6 +1141,9 @@ async function addDeal(req, res) {
   const dealData = new db.Deal({
     title: req.body.title,
     paragraph: req.body.paragraph,
+    price: req.body.price,
+    discountedPrice: req.body.discountedPrice,
+    discountCode: req.body.discountCode,
     link: req.body.link,
     image: image,
   });
@@ -1195,7 +1201,9 @@ async function DealUpdate(req, res) {
       title: req.body.title,
       paragraph: req.body.paragraph,
       link: req.body.link,
-  
+      price: req.body.price,
+      discountedPrice: req.body.discountedPrice,
+      discountCode: req.body.discountCode,
       imgae: image,
       updated_at: new Date()
     }, function (err, result) {
